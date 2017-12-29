@@ -107,6 +107,7 @@ and open the template in the editor.
             }
     
             document.onmousedown = function(event){
+                console.log("Client:Click");
                 socket.emit("KeyPress",{inputId:"attack",state:true});
             }
             
