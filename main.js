@@ -159,6 +159,8 @@ Bullet.update = function(){
 }
 
 //Connections
+var DEBUG = true;
+
 var io = require("socket.io")(serv,{});
 io.sockets.on("connection", function(socket){
     console.log("Socket Connection");    
@@ -180,6 +182,18 @@ io.sockets.on("connection", function(socket){
             SOCKET_LIST[i].emit("addToChat", playerName + ": "+ data);
         }
     });
+    
+    socket.on("evalServer", function(data){
+        if(!DEBUG)
+            return;
+        
+        var res = eval(data);
+        socket.emit("evalAnswer", res);
+        
+        
+    });
+    
+    
     
 });    
     
