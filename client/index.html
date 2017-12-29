@@ -16,12 +16,29 @@ and open the template in the editor.
         
     </head>
     <body>
+        <!--Game Screen -->
         <canvas id="ctx" width="500" height="500" style="border:1px solid black;"></canvas>
+
+        <!--Cat Box -->
+        <div id="chat-text" style="width: 500px;height: 100px;overflow-y: scroll;" >
+            <div>Hello</div>
+        </div>
+        <form id="chat-form">
+            <input id="chat-input" type="text" style="width: 500px;"  > 
+        </form>
+        
+        
         
         <script> 
-            var socket = io(); 
+            
+            var chatText  = document.getElementById("chat-text");
+            var chatForm  = document.getElementById("chat-form");
+            var chatInput = document.getElementById("chat-input");
             var ctx = document.getElementById("ctx").getContext("2d");
             ctx.font = "30px Arial";
+
+    
+            var socket = io(); 
             
             socket.on("newPosition", function(data){
                 ctx.clearRect(0,0,500,500);
@@ -34,6 +51,17 @@ and open the template in the editor.
                 }
                 
             });
+            
+            socket.on("addToChat", function(data){
+                chatText.innerHTML += "<div>" + data + "</div>";
+            });
+            
+            
+            chatForm.onsubmit = function(e){
+                e.preventDefault();
+                socket.emit("sendMsgToServer",chatInput.value);
+                chatInput.value = "";
+            }
             
             document.onkeydown = function(event){
                 switch(event.keyCode){
@@ -50,8 +78,6 @@ and open the template in the editor.
                     case 83: //s
                         socket.emit("KeyPress",{inputId:"down",state:true});
                     break;
-                    default:
-                        console.log("Key Press Down: "+event.keyCode);
                 }
             }
 
@@ -69,8 +95,6 @@ and open the template in the editor.
                     case 83: //s
                         socket.emit("KeyPress",{inputId:"down",state:false});
                     break;
-                    default:
-                        console.log("Key Press Up: "+event.keyCode);
                 }
             }
     
