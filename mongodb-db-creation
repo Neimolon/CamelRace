@@ -1,0 +1,12 @@
+Create Database:
+   use CamelRace
+
+Create Collection:
+   db.createCollection("account");
+   db.createCollection("progress");
+
+Add Document to Collection:
+   db.account.insert({username:"diego",password:"XXXXXX"});
+   db.account.insert({username:"diego",level:1,});
+
+
