@@ -46,7 +46,8 @@ var Player = function(id){
     self.pressingLeft = false;
     self.pressingUp = false ;
     self.pressingDown = false ;
-    self.pressingSpace = false ;
+    self.pressingAttack = false ;
+    self.mouseAngle = 100;
     self.maxSpd = 10 ;
     
     var super_update = self.update;
@@ -54,6 +55,16 @@ var Player = function(id){
     self.update = function(){
         self.updateSpd();
         super_update();
+        
+        if(self.pressingAttack){
+           self.shootBullet(self.mouseAngle);
+        }
+    }
+    
+    self.shootBullet = function(angle){
+        var b = Bullet(angle);
+        b.x = self.x;
+        b.y = self.y;
     }
     
     self.updateSpd = function(){
@@ -79,7 +90,7 @@ Player.list = {} ;
 Player.onConnect = function(socket){
     var player = Player(socket.id);
     
-    socket.on("KeyPress", function(data){   
+    socket.on("KeyPress", function(data){         
         switch(data.inputId){
             case "left":
                 player.pressingLeft = data.state;
@@ -92,6 +103,12 @@ Player.onConnect = function(socket){
             break;
             case "down":
                 player.pressingDown = data.state;
+            break;
+            case "attack":
+                player.pressingAttack = data.state;
+            break;
+            case "mouseAngle":
+                player.mouseAngle = data.state;
             break;
         }
     });
@@ -140,9 +157,7 @@ var Bullet = function(angle){
 Bullet.list = {};    
 
 Bullet.update = function(){
-    if(Math.random() < 0.1){
-        Bullet(Math.random() * 360);
-    }
+
     
     var pack = [];
     
@@ -158,9 +173,15 @@ Bullet.update = function(){
     return pack;
 }
 
-//Connections
+
+//   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//   !!!!!!!  WARNING OF DEATH OR WORSE !!!!!!!!!
+//   !ALLWAYS SET "DEBUG" TO FALSE ON PRODUCTION!
+//   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 var DEBUG = true;
 
+
+//Connections
 var io = require("socket.io")(serv,{});
 io.sockets.on("connection", function(socket){
     console.log("Socket Connection");    

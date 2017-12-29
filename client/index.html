@@ -106,7 +106,21 @@ and open the template in the editor.
                 }
             }
     
-    
+            document.onmousedown = function(event){
+                socket.emit("KeyPress",{inputId:"attack",state:true});
+            }
+            
+            document.onmouseup = function(event){
+                socket.emit("KeyPress",{inputId:"attack",state:false});
+            }
+
+            document.onmousemove = function(event){
+                var x = -250 + event.clientX -8;
+                var y = -250 + event.clientY -8;
+                var angle = Math.atan2(y,x) / Math.PI * 180;
+                socket.emit("KeyPress",{inputId:"mouseAngle",state:angle});        
+            }            
+            
         </script>
         
         
