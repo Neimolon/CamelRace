@@ -42,6 +42,8 @@ and open the template in the editor.
         
         
         <script> 
+            var WIDTH = 500;
+            var HEIGHT = 500;
             var socket = io(); 
                         
             //sign
@@ -77,7 +79,7 @@ and open the template in the editor.
                }
             });
             
-            //chate
+            //chat
             var chatText  = document.getElementById("chat-text");
             var chatForm  = document.getElementById("chat-form");
             var chatInput = document.getElementById("chat-input");
@@ -103,6 +105,14 @@ and open the template in the editor.
             
             
             //game
+            var Img = {};
+            Img.player = new Image();
+            Img.player.src = '/client/img/player.png';
+            Img.bullet = new Image();
+            Img.bullet.src = '/client/img/bullet.png';
+            Img.map = new Image();
+            Img.map.src = '/client/img/map.png';
+                        
             
             var ctx = document.getElementById("ctx").getContext("2d");
             ctx.font = "30px Arial";
@@ -117,11 +127,25 @@ and open the template in the editor.
                 self.hpMax = initPack.hpMax;
                 self.score = initPack.score;
                 
-                self.draw = function(){
+                self.draw = function(){       
+                    var x = self.x - Player.list[selfId].x + WIDTH/2
+                    var y = self.y - Player.list[selfId].y + HEIGHT/2
+                    
                     var hpWidth = 30 * self.hp / self.hpMax;
-                    ctx.fillRect(self.x - hpWidth/2, self.y - 40, hpWidth, 4);
-                    ctx.fillText(self.number, self.x, self.y);
-                    ctx.fillText(self.score, self.x, self.y-60);
+                    ctx.fillStyle = "red";
+                    ctx.fillRect(x - hpWidth/2, y - 40, hpWidth, 4);
+                    
+                    var width = Img.player.width * 2;
+                    var height = Img.player.height * 2;
+                    
+
+                    
+                    ctx.drawImage(Img.player,
+                        0, 0, Img.player.width, Img.player.height,
+                        x-width/2, y-height/2, width, height);
+                  
+        
+                    //  ctx.fillText(self.score, self.x, self.y-60);
                 }
 
                 Player.list[self.id] = self;
@@ -137,7 +161,15 @@ and open the template in the editor.
                 self.y = initPack.y;
                 
                 self.draw = function(){
-                    ctx.fillRect(self.x - 5, self.y - 5 , 10,10);
+                    var width = Img.bullet.width / 2;
+                    var height = Img.bullet.height / 2;
+                    
+                    var x = self.x - Player.list[selfId].x + WIDTH/2
+                    var y = self.y - Player.list[selfId].y + HEIGHT/2
+                    
+                    ctx.drawImage(Img.bullet,
+                        0 ,0 ,Img.bullet.width ,Img.bullet.height,
+                        x-width/2, y-height/2, width, height);
                 }
                     
                 Bullet.list[self.id] = self;
@@ -147,8 +179,14 @@ and open the template in the editor.
             Bullet.list = {};
             
             //init
+            var selfId =  null;
             
             socket.on("init",function(data){
+                
+                if(data.selfId)
+                    selfId = data.selfId ;
+                    
+                    
                 for(var i = 0; i < data.player.length; i++){
                     new Player(data.player[i]);
                 }
@@ -199,10 +237,13 @@ and open the template in the editor.
     
             
             setInterval(function(){
+                if(!selfId)
+                    return;
                 ctx.clearRect(0,0,500,500);
+                drawMap();
+                drawScore();
                 for(var i in Player.list){
                     Player.list[i].draw ();
-                    ctx.fillText(Player.list[i].number, Player.list[i].x, Player.list[i].y);
                 }
                 
                 for(var i in Bullet.list){
@@ -211,6 +252,18 @@ and open the template in the editor.
                 }
             },40);
             
+            
+            var drawMap = function(){
+                var x = WIDTH/2 - Player.list[selfId].x;
+                var y = HEIGHT/2 - Player.list[selfId].y;
+                ctx.drawImage(Img.map,x,y);
+            }
+            
+            var drawScore =  function(){
+                ctx.fillStyle = "white";
+                console.log(selfId);
+                ctx.fillText(Player.list[selfId].score, 0, 30);
+            }
             
             document.onkeydown = function(event){
                 switch(event.keyCode){
